@@ -16,34 +16,49 @@ static int clients = 0;
 
 void child(int sd, int clients){
 	char fileName[32];
+	int bytes_received = 0;
 	srand(time(NULL));
 	int random_filename = rand();
 	snprintf(fileName, sizeof(char) * 32, "file_%i.txt", random_filename);
 
 	int fd = open(fileName, O_CREAT|O_RDWR, 0666);
-	char fileContent[255];
+	char fileContent[256];
+
 	fprintf(stderr,"Now reading content\n");
 	char pattern[10];
 	if(read(sd, pattern, 10)>0){
 		fprintf(stderr, "client's pattern: %s\n",pattern);
-		if(read(sd, fileContent, 255)>0){
+		while((bytes_received = read(sd, fileContent, 256)) > 0){
 			fprintf(stderr, "client's message: %s\n",fileContent);
-			int n=write(fd,fileContent,255);
+			int n = write(fd, fileContent, bytes_received);
 			fprintf(stderr,"Read bytes %d\n", n);
-			
-			// pipe 
-			dup2(sd, 1);
-			char *command_args[] = { "grep", "--text", "-w", pattern, "--color=always", fileName, NULL };
-	    // # how to output the result to socket
-	    
-	    		printf("- before execv");
-			execvp(command_args[0], command_args);
-			
-		}else{
-			fprintf(stderr, "not able to read\n");
+			if(bytes_received < 256){
+				break;
+			}
 		}
-	}else{
-		fprintf(stderr, "not able to read pattern\n");
+		
+		dup2(sd, 1);
+		char *command_args[] = { "grep", "--text", "--with-filename", "-w", pattern, "--color=always", fileName, NULL };
+		
+		int pid = fork();
+		if (pid == 0) {          /* for the child process:         */
+          if (execvp(command_args[0], command_args) < 0) {     /* execute the command  */
+               printf("*** ERROR: exec failed\n");
+               exit(1);
+          }
+     }
+     else {                                  /* for the parent:      */
+          waitpid(pid, NULL, 0);
+     }
+
+
+		
+		
+
+		exit(0);
+	}
+	else {
+			fprintf(stderr, "not able to read pattern\n");
 	}
 	
 	

@@ -48,27 +48,28 @@ int main(int argc, char *argv[]){
 	if(pid==0)
 	{
 	    printf("Local client output: \n");
-	    char *command_args[] = { "/usr/bin/grep", "-w", argv[3], "--color=always", argv[4], NULL };
-	    execv(command_args[0], command_args);
+	    char *command_args[] = { "grep", "--text", "--with-filename", "-w", argv[3], "--color=always", argv[4], NULL };
+	    execvp(command_args[0], command_args);
 	    exit(0);
 	}
 	else if(pid>0)
 	{
 		waitpid(pid, NULL, 0);
 	  int fd = open(argv[5], O_RDONLY);
-		char fileContent[255];
-		int n = 255;
-		int len_f = lseek(fd,0,SEEK_END);
-		lseek(fd,0,SEEK_SET);
 		write(ssd, argv[3], strlen(argv[3])+1);
-		while(n!=0){
-			// printf("len:%d\n",len_f);
-			n=read(fd, fileContent,255);
-			if((len_f+1)<255){
-				n = 0;
+
+		while(1){
+			unsigned char fileContent[256] = {0};
+			int n = read(fd, fileContent, 256);
+			if (n > 0){
+				write(ssd, fileContent, n);
 			}
-			// fprintf(stderr, "file's message: %s:::%d\n",fileContent,n);
-			write(ssd, fileContent, strlen(fileContent)+1);
+			// printf("No of bytes sent in server %i\n", n);
+			// printf("sending file content : \n %s", fileContent);
+
+			if (n < 256){	
+				break; 
+			}
 		}
 		close(fd);
 
