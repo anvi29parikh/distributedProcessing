@@ -38,24 +38,44 @@ int main(int argc, char *argv[]){
 	
 
 	if(connect(ssd,(struct sockaddr *)&servAdd,sizeof(servAdd))<0){
-		fprintf(stderr, "connect() has failed, exiting\n");
+		fprintf(stderr, "ERROR: Couldn't connect with server\n");
 		exit(3);
 	}
 	
+
+	int fd = open(argv[5], O_RDONLY);
+	if(fd < 0)
+	{
+		printf("ERROR: Couldn't read the Input File\n");
+		exit(0);
+	}
+
+	int fd2 = open(argv[4], O_RDONLY);
+	if(fd2 < 0)
+	{
+		printf("ERROR: Couldn't read the Input File\n");
+		exit(0);
+	}
 	
+
 	int pid=fork();
     
 	if(pid==0)
 	{
-	    printf("Local client output: \n");
+	    // printf("Local Client output: \n");
 	    char *command_args[] = { "grep", "--text", "--with-filename", "-w", argv[3], "--color=always", argv[4], NULL };
-	    execvp(command_args[0], command_args);
+
+	    if (execvp(command_args[0], command_args) < 0) {     /* execute the command  */
+				printf("ERROR: Couldn't read the Input File\n");
+				exit(1);
+			}
 	    exit(0);
+			
 	}
 	else if(pid>0)
 	{
 		waitpid(pid, NULL, 0);
-	  int fd = open(argv[5], O_RDONLY);
+	  
 		write(ssd, argv[3], strlen(argv[3])+1);
 
 		while(1){
@@ -64,26 +84,21 @@ int main(int argc, char *argv[]){
 			if (n > 0){
 				write(ssd, fileContent, n);
 			}
-			// printf("No of bytes sent in server %i\n", n);
-			// printf("sending file content : \n %s", fileContent);
-
 			if (n < 256){	
 				break; 
 			}
 		}
 		close(fd);
 
-		fprintf(stderr, "written to server, waiting for results : \n");
+		// fprintf(stderr, "written to server, waiting for results : \n");
 
 		if(read(ssd, message, 255)<0){
 			fprintf(stderr, "read() error\n");
 			exit(3);
 		}
-		fprintf(stderr, "server's Output: \n%s ",message);
-		
+		// printf("Server's output: \n");
+		printf("%s\n",message);	
 	}
-	
-	
 }
 
 

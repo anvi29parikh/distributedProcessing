@@ -14,7 +14,7 @@ static int clients = 0;
 
 
 
-void child(int sd, int clients){
+void handle_client(int sd, int clients){
 	char fileName[32];
 	int bytes_received = 0;
 	srand(time(NULL));
@@ -49,12 +49,8 @@ void child(int sd, int clients){
      }
      else {                                  /* for the parent:      */
           waitpid(pid, NULL, 0);
-     }
-
-
-		
-		
-
+					write(sd, "\n", 1);
+		 }
 		exit(0);
 	}
 	else {
@@ -98,7 +94,7 @@ int main(int argc, char *argv[]){
 		csd=accept(sd,(struct sockaddr*)NULL,NULL);
 		printf("New connection with client %d\n", clients);
 		if(fork()==0)
-			child(csd, clients);
+			handle_client(csd, clients);
 	}
 	close(csd);
 }
