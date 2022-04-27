@@ -1,3 +1,7 @@
+// AUTHORS: 
+// ANVI 110030925
+// NISCHAY 110062123
+
 #include <stdio.h>
 #include <netdb.h>
 #include <netinet/in.h>
