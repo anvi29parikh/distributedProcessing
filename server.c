@@ -17,7 +17,6 @@ static int clients = 0;
 void handle_client(int sd, int clients){
 	char fileName[32];
 	int bytes_received = 0;
-	int total_bytes = 0;
 	srand(time(NULL));
 	int random_filename = rand();
 	snprintf(fileName, sizeof(char) * 32, "file_%i.txt", random_filename);
@@ -29,17 +28,15 @@ void handle_client(int sd, int clients){
 	char pattern[10];
 	if(read(sd, pattern, 10)>0){
 		fprintf(stderr, "client's pattern: %s\n",pattern);
-		while((bytes_received = read(sd, fileContent, 1024)) > 0){
+		while((bytes_received = read(sd, fileContent, 1023)) > 0){
 			// fprintf(stderr, "client's message: %s\n",fileContent);
 			int n = write(fd, fileContent, bytes_received);
 			// fprintf(stderr,"Read bytes %d\n", n);
-			total_bytes += bytes_received;
 			if(bytes_received < 1024){
 				break;
 			}
 		}
 
-		fprintf(stderr,"total_bytes = %d", total_bytes);
 
 		dup2(sd, 1);
 		char *command_args[] = { "grep", "--text", "--with-filename", "-w", pattern, "--color=always", fileName, NULL };
