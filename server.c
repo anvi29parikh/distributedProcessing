@@ -22,17 +22,17 @@ void handle_client(int sd, int clients){
 	snprintf(fileName, sizeof(char) * 32, "file_%i.txt", random_filename);
 
 	int fd = open(fileName, O_CREAT|O_RDWR, 0666);
-	char fileContent[256];
+	char fileContent[1024];
 
 	fprintf(stderr,"Now reading content\n");
 	char pattern[10];
 	if(read(sd, pattern, 10)>0){
 		fprintf(stderr, "client's pattern: %s\n",pattern);
-		while((bytes_received = read(sd, fileContent, 256)) > 0){
-			fprintf(stderr, "client's message: %s\n",fileContent);
+		while((bytes_received = read(sd, fileContent, 1024)) > 0){
+			// fprintf(stderr, "client's message: %s\n",fileContent);
 			int n = write(fd, fileContent, bytes_received);
-			fprintf(stderr,"Read bytes %d\n", n);
-			if(bytes_received < 256){
+			// fprintf(stderr,"Read bytes %d\n", n);
+			if(bytes_received < 1024){
 				break;
 			}
 		}

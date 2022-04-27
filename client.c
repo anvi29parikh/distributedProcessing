@@ -12,7 +12,7 @@
 
 
 int main(int argc, char *argv[]){
-	char message[255];
+	char message[1024];
 	int ssd, portNumber;
 	socklen_t len;
 	struct sockaddr_in servAdd;
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]){
 				exit(1);
 			}
 	    exit(0);
-			
+
 	}
 	else if(pid>0)
 	{
@@ -79,12 +79,12 @@ int main(int argc, char *argv[]){
 		write(ssd, argv[3], strlen(argv[3])+1);
 
 		while(1){
-			unsigned char fileContent[256] = {0};
-			int n = read(fd, fileContent, 256);
+			unsigned char fileContent[1024] = {0};
+			int n = read(fd, fileContent, 1024);
 			if (n > 0){
 				write(ssd, fileContent, n);
 			}
-			if (n < 256){	
+			if (n < 1024){	
 				break; 
 			}
 		}
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]){
 
 		// fprintf(stderr, "written to server, waiting for results : \n");
 
-		if(read(ssd, message, 255)<0){
+		if(read(ssd, message, 1024)<0){
 			fprintf(stderr, "read() error\n");
 			exit(3);
 		}
