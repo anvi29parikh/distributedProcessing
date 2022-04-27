@@ -84,6 +84,7 @@ int main(int argc, char *argv[]){
 			if (n > 0){
 				write(ssd, fileContent, n);
 			}
+			printf("n = %d", n);
 			if (n < 1024){	
 				break; 
 			}
